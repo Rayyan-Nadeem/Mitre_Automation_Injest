@@ -1,4 +1,4 @@
-
+import pandas as pd
 import json
 
 def load_data(filename):
@@ -8,13 +8,23 @@ def load_data(filename):
 def query_data(data, queries):
     results = []
 
+    # Convert comma-separated string values to lists for "match any" behavior
+    for key, value in queries.items():
+        if isinstance(value, str) and ',' in value:
+            queries[key] = [v.strip() for v in value.split(',')]
+
     # Find matching techniques based on queries
     for item in data:
         match = True
         for key, value in queries.items():
             if value:  # If a query value is specified
-                if isinstance(item.get(key), list):  # For fields with list values (e.g., platforms)
-                    if not any(value in v for v in item.get(key, [])):  # Check for partial matches within the list
+                item_values = item.get(key, []) or []
+                if isinstance(value, list):  # Special handling for "match any" behavior
+                    if not any(v in item_values for v in value):  # Check if any of the query values match
+                        match = False
+                        break
+                elif isinstance(item_values, list):  # For other fields with list values
+                    if not any(value in v for v in item_values):  # Check for partial matches within the list
                         match = False
                         break
                 elif item.get(key) != value:  # For fields with string values
@@ -62,12 +72,14 @@ if __name__ == "__main__":
         "relationship": None
     }
 
-    # Update the query values as needed
+# Update the query values as needed
     # Example: queries["platforms"] = "Windows"
 
     results = query_data(data, queries)
+    
+    # Convert results to a DataFrame and save to a CSV
+    df = pd.DataFrame(results)
+    df.to_csv("query_results.csv", index=False)
 
     # Print results
-    for item in results:
-        print(item)
-
+    print(df)
