@@ -7,6 +7,7 @@ def load_data(filename):
 
 def query_data(data, queries):
     results = []
+    matched_ids = set()  # Track IDs of matched techniques to prevent duplicates
 
     # Convert comma-separated string values to lists for "match any" behavior
     for key, value in queries.items():
@@ -17,64 +18,42 @@ def query_data(data, queries):
     for item in data:
         match = True
         for key, value in queries.items():
-            if value:  # If a query value is specified
-                item_values = item.get(key, []) or []
-                if isinstance(value, list):  # Special handling for "match any" behavior
-                    if not any(v in item_values for v in value):  # Check if any of the query values match
-                        match = False
-                        break
-                elif isinstance(item_values, list):  # For other fields with list values
-                    if not any(value in v for v in item_values):  # Check for partial matches within the list
-                        match = False
-                        break
-                elif item.get(key) != value:  # For fields with string values
+            item_values = item.get(key, []) or []
+            if not value:  # If the query value is None or empty, it's a wildcard match
+                continue
+            elif not item_values:  # If the item value is None or empty, it's applicable to all
+                continue
+            elif isinstance(value, list):  # Special handling for "match any" behavior
+                if not any(v in item_values for v in value):  # Check if any of the query values match
                     match = False
                     break
+            elif isinstance(item_values, list):  # For fields with list values
+                if not any(value in v for v in item_values):  # Check for partial matches within the list
+                    match = False
+                    break
+            elif item.get(key) != value:  # For fields with string values
+                match = False
+                break
 
-        if match:
+        if match and item['ID'] not in matched_ids:
             results.append(item)
-            # If a sub-technique is matched, fetch its parent and siblings
-            if item['is sub-technique']:
-                parent_id = item['sub-technique of']
-                parent = next((tech for tech in data if tech['ID'] == parent_id), None)
-                if parent:
-                    results.append(parent)
-                    siblings = [tech for tech in data if tech['sub-technique of'] == parent_id and tech['ID'] != item['ID']]
-                    results.extend(siblings)
-
+            matched_ids.add(item['ID'])
+            
     return results
 
+# Additional function to load the queries from param.json
+def load_queries(filename):
+    with open(filename, 'r', encoding='utf-8-sig') as f:
+        return json.load(f)
+
+# Updated main block to use the load_queries function
 if __name__ == "__main__":
     data = load_data("enterprise-attack-v13.1.json")
     
-    # Define your queries here (key-value pairs with default None)
-    queries = {
-        "ID": None,
-        "name": None,
-        "description": None,
-        "url": None,
-        "created": None,
-        "last modified": None,
-        "version": None,
-        "tactics": None,
-        "detection": None,
-        "platforms": "Windows",
-        "data sources": None,
-        "is sub-technique": None,
-        "sub-technique of": None,
-        "defenses bypassed": "Anti-virus, Application Control, File monitoring, Host intrusion prevention systems, System Access Controls, Signature-based detection",
-        "contributors": None,
-        "permissions required": "User",
-        "supports remote": None,
-        "system requirements": None,
-        "impact type": None,
-        "effective permissions": None,
-        "relationship": None
-    }
+    # Load your queries from param.json
+    queries = load_queries("param.json")
 
-# Update the query values as needed
-    # Example: queries["platforms"] = "Windows"
-
+    # Execute the query and get the results
     results = query_data(data, queries)
     
     # Convert results to a DataFrame and save to a CSV
