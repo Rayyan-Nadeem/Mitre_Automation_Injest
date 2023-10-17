@@ -1,4 +1,5 @@
 {
+    "EntityID": "15bdaffe-8b4b-45b5-8eda-f00c5547726e",
     "ID": null,
     "name": null,
     "description": null,
@@ -8,7 +9,7 @@
     "version": null,
     "tactics": null,
     "detection": null,
-    "platforms": "Azure AD",
+    "platforms": "Linux",
     "data sources": null,
     "is sub-technique": null,
     "sub-technique of": null,
@@ -20,5 +21,5 @@
     "impact type": null,
     "effective permissions": null,
     "relationship": null,
-    "entities": "process"
+    "entities": "data flow"
 }
