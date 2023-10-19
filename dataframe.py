@@ -2,7 +2,7 @@ import pandas as pd
 import json
 
 # File paths
-source_data_file_path = "MIPSA TM Blank.json"
+source_data_file_path = "threatdragon_blank.json"
 db_data_file_path = "data.json"
 query_file_path = "param.json"
 
@@ -55,9 +55,9 @@ def query_data(data, queries):
                 match = False
                 break
 
-        if match and item['ID'] not in matched_ids:
+        if match and item['id'] not in matched_ids:
             results.append(item)
-            matched_ids.add(item['ID'])
+            matched_ids.add(item['id'])
 
     return results
 

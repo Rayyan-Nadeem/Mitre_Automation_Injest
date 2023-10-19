@@ -1,5 +1,5 @@
 {
-    "EntityID": "15bdaffe-8b4b-45b5-8eda-f00c5547726e",
+    "EntityID": "67e045fd-61d3-4e9a-951d-f5988aebee0d",
     "id": null,
     "name": null,
     "description": null,
@@ -9,7 +9,7 @@
     "version": null,
     "tactics": null,
     "detection": null,
-    "platforms": "Linux",
+    "platforms": "Azure Ad",
     "data_sources": null,
     "is_sub_technique": null,
     "sub_technique_of": null,
