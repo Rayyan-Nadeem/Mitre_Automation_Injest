@@ -6,7 +6,7 @@ import faiss
 import numpy as np
 from sentence_transformers import SentenceTransformer
 from pathlib import Path
-#print(datetime.now(), "Import completed.")
+#print(datetme.now(), "Import completed.")
 
 root_path = "/hostdata/"
 encoder = SentenceTransformer("all-mpnet-base-v2")
