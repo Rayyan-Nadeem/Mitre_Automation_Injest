@@ -6,7 +6,7 @@ import numpy as np
 
 # Load data from a JSON file specified by file_path
 def load_data(file_path):
-    with open(file_path, 'r') as f:
+    with open(file_path, 'r', encoding='utf-8') as f:
         data = json.load(f)
     return data
 
@@ -56,9 +56,10 @@ def search_top_k(platform, query, model, threat_data, top_k=5):
     
     # Map FAISS indices to threat IDs and retrieve the actual threat data
     threats = [id_to_data[str(idx)] for idx in I[0] if str(idx) in id_to_data]
+    # Since we used IndexFlatIP and normalized the embeddings, D can be interpreted as cosine similarity
+    confidences = D[0]  # No need to invert the scores, as higher is better
 
-    return threats
-
+    return threats, confidences
 
 
 # Update threats in the source data based on entity platforms and similarity to threat data
@@ -103,12 +104,10 @@ def update_threats_for_entities(source_data, model, threat_data):
 
                                 # Perform a FAISS search to find the most similar threats
                                 # Inside update_threats_for_entities function
-                                threats = search_top_k(platform, query, model, threat_data)
-                                # Check if the search was successful
+                                threats, confidences = search_top_k(platform, query, model, threat_data)
                                 if threats is not None:
-                                    # Iterate over the threats and update the 'threats' key in the entity's data
-                                    for threat in threats:
-                                        print(threat)
+                                    for threat, confidence in zip(threats, confidences):
+                                        print(f"Threat: {threat}, Confidence: {confidence}")
                                         if 'threats' not in data:
                                             data['threats'] = []
                                         if threat not in data['threats']:

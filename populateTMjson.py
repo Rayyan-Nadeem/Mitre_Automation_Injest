@@ -6,7 +6,7 @@ import numpy as np
 
 # Load data from a JSON file specified by file_path
 def load_data(file_path):
-    with open(file_path, 'r') as f:
+    with open(file_path, 'r', encoding='utf-8') as f:
         data = json.load(f)
     return data
 
@@ -37,6 +37,7 @@ def entity_to_query_string(entity):
     query = ", ".join(query_parts)
     return query
 
+# Perform similarity search and retrieve top-k threat IDs for a platform and query
 def search_top_k(platform, query, model, top_k=5):
     index = get_faiss_index(platform)
     if index is None:
@@ -52,10 +53,12 @@ def search_top_k(platform, query, model, top_k=5):
     threat_ids = [id_to_data[str(idx)] for idx in I[0] if str(idx) in id_to_data]
     return threat_ids
 
+# Retrieve full threat information for a list of threat IDs from threat_data
 def get_full_threat_info(threat_ids, threat_data):
     # Retrieve full threat information for each ID
     return [threat_data[threat_id] for threat_id in threat_ids if threat_id in threat_data]
 
+# Update the 'threats' key in data with new threat information
 def update_entity_threats(data, full_threat_info):
     # Ensure 'threats' key exists
     if 'threats' not in data:
@@ -89,15 +92,15 @@ def update_threats_for_entities(source_data, model, threat_data):
 
 # Main function to execute the threat update process
 def main():
-    source_data_file_path = "threatdragon_blank.json"
-    threat_data_file_path = "data.json"
-    model = SentenceTransformer("all-mpnet-base-v2")
-    source_data = load_data(source_data_file_path)
-    threat_data = load_data(threat_data_file_path)
-    updated_data = update_threats_for_entities(source_data, model, threat_data)
+    source_data_file_path = "threatdragon_blank.json"  # Path to the source data JSON file
+    threat_data_file_path = "data.json"  # Path to the threat data JSON file
+    model = SentenceTransformer("all-mpnet-base-v2")  # Load a Sentence Transformer model
+    source_data = load_data(source_data_file_path)  # Load the source data
+    threat_data = load_data(threat_data_file_path)  # Load the threat data
+    updated_data = update_threats_for_entities(source_data, model, threat_data)  # Update threats in the source data
     with open('updated_threatdragon.json', 'w') as updated_file:
-        json.dump(updated_data, updated_file, indent=4)
+        json.dump(updated_data, updated_file, indent=4)  # Save the updated data to a JSON file
     print("Threats updated successfully!")
 
 if __name__ == "__main__":
-    main()
+    main()  # Execute the main function when the script is run
